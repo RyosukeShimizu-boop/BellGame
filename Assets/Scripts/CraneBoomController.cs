@@ -200,6 +200,13 @@ public class CraneBoomController : MonoBehaviour
         moveRight = false;
     }
 
+    public void ResumeSetup()
+    {
+        setupMode = true;
+        moveLeft = false;
+        moveRight = false;
+    }
+
     private void InitializeFromCurrentPosition()
     {
         if (cranePivot == null || pendulumRoot == null)

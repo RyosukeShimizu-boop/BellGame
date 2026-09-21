@@ -9,6 +9,10 @@ public class PendulumSetupController : MonoBehaviour
         Hammer
     }
 
+    [Header("Initial Setup Angle")]
+    [SerializeField]
+    private float secondInitialAngle = 90.0f;
+
     [Header("Camera")]
     [SerializeField]
     private Camera mainCamera;
@@ -59,8 +63,36 @@ public class PendulumSetupController : MonoBehaviour
     [SerializeField]
     private float handleRadius = 0.5f;
 
+    [Header("Start And Stop Buttons")]
+    [SerializeField]
+    private GameObject startButton;
+
+    [SerializeField]
+    private GameObject stopButton;
+
     private DragTarget currentDragTarget;
     private bool setupMode = true;
+
+    private Vector3 savedRootPosition;
+    private Quaternion savedRootRotation;
+
+    private float savedFirstJointAngle;
+    private float savedSecondJointAngle;
+
+    private Vector3 savedFirstVisualPosition;
+    private Vector3 savedFirstVisualScale;
+    private Vector3 savedFirstColliderCenter;
+    private Vector3 savedFirstColliderSize;
+
+    private Vector3 savedSecondVisualPosition;
+    private Vector3 savedSecondVisualScale;
+    private Vector3 savedSecondColliderCenter;
+    private Vector3 savedSecondColliderSize;
+
+    private Vector3 savedSecondParentAnchorPosition;
+    private Vector3 savedHitPointPosition;
+
+    private bool hasSavedSetup;
 
     private void Awake()
     {
@@ -69,11 +101,25 @@ public class PendulumSetupController : MonoBehaviour
             mainCamera = Camera.main;
         }
 
-        // �Z�b�e�B���O���͕����^�����~�߂�
+        SetJointAngle(
+            secondPendulum,
+            secondInitialAngle
+        );
+
         firstPendulum.useGravity = false;
         secondPendulum.useGravity = false;
 
         StopPhysics();
+
+        if (startButton != null)
+        {
+            startButton.SetActive(true);
+        }
+
+        if (stopButton != null)
+        {
+            stopButton.SetActive(false);
+        }
     }
 
     private void Update()
@@ -369,6 +415,13 @@ public class PendulumSetupController : MonoBehaviour
 
     public void StartSimulation()
     {
+        if (!setupMode)
+        {
+            return;
+        }
+
+        SaveCurrentSetup();
+
         setupMode = false;
         currentDragTarget = DragTarget.None;
 
@@ -376,5 +429,188 @@ public class PendulumSetupController : MonoBehaviour
 
         firstPendulum.useGravity = true;
         secondPendulum.useGravity = true;
+
+        if (startButton != null)
+        {
+            startButton.SetActive(false);
+        }
+
+        if (stopButton != null)
+        {
+            stopButton.SetActive(true);
+        }
+    }
+
+    public void StopSimulation()
+    {
+        RestoreSavedSetup();
+
+        setupMode = true;
+        currentDragTarget = DragTarget.None;
+
+        if (startButton != null)
+        {
+            startButton.SetActive(true);
+        }
+
+        if (stopButton != null)
+        {
+            stopButton.SetActive(false);
+        }
+    }
+
+    private void SaveCurrentSetup()
+    {
+        savedRootPosition =
+            transform.position;
+
+        savedRootRotation =
+            transform.rotation;
+
+        if (firstPendulum.dofCount > 0)
+        {
+            savedFirstJointAngle =
+                firstPendulum.jointPosition[0];
+        }
+
+        if (secondPendulum.dofCount > 0)
+        {
+            savedSecondJointAngle =
+                secondPendulum.jointPosition[0];
+        }
+
+        savedFirstVisualPosition =
+            firstVisual.localPosition;
+
+        savedFirstVisualScale =
+            firstVisual.localScale;
+
+        savedFirstColliderCenter =
+            firstCollider.center;
+
+        savedFirstColliderSize =
+            firstCollider.size;
+
+        savedSecondVisualPosition =
+            secondVisual.localPosition;
+
+        savedSecondVisualScale =
+            secondVisual.localScale;
+
+        savedSecondColliderCenter =
+            secondCollider.center;
+
+        savedSecondColliderSize =
+            secondCollider.size;
+
+        savedSecondParentAnchorPosition =
+            secondPendulum.parentAnchorPosition;
+
+        savedHitPointPosition =
+            hammerHandle.localPosition;
+
+        hasSavedSetup = true;
+    }
+
+    private void RestoreSavedSetup()
+    {
+        if (!hasSavedSetup)
+        {
+            return;
+        }
+
+        // 先に物理を完全停止
+        firstPendulum.useGravity = false;
+        secondPendulum.useGravity = false;
+
+        StopPhysics();
+
+        // ルートを開始前の位置へ戻す
+        ArticulationBody rootBody =
+            GetComponent<ArticulationBody>();
+
+        rootBody.TeleportRoot(
+            savedRootPosition,
+            savedRootRotation
+        );
+
+        rootBody.linearVelocity =
+            Vector3.zero;
+
+        rootBody.angularVelocity =
+            Vector3.zero;
+
+        // 長さとVisual、Colliderを復元
+        firstVisual.localPosition =
+            savedFirstVisualPosition;
+
+        firstVisual.localScale =
+            savedFirstVisualScale;
+
+        firstCollider.center =
+            savedFirstColliderCenter;
+
+        firstCollider.size =
+            savedFirstColliderSize;
+
+        secondVisual.localPosition =
+            savedSecondVisualPosition;
+
+        secondVisual.localScale =
+            savedSecondVisualScale;
+
+        secondCollider.center =
+            savedSecondColliderCenter;
+
+        secondCollider.size =
+            savedSecondColliderSize;
+
+        secondPendulum.matchAnchors = false;
+
+        secondPendulum.anchorPosition =
+            Vector3.zero;
+
+        secondPendulum.parentAnchorPosition =
+            savedSecondParentAnchorPosition;
+
+        hammerHandle.localPosition =
+            savedHitPointPosition;
+
+        // 関節角度を復元
+        SetJointPositionRadians(
+            firstPendulum,
+            savedFirstJointAngle
+        );
+
+        SetJointPositionRadians(
+            secondPendulum,
+            savedSecondJointAngle
+        );
+
+        StopPhysics();
+    }
+
+    private void SetJointPositionRadians(
+    ArticulationBody body,
+    float angleRadians)
+    {
+        if (body == null || body.dofCount == 0)
+        {
+            return;
+        }
+
+        ArticulationReducedSpace position =
+            body.jointPosition;
+
+        position[0] = angleRadians;
+
+        body.jointPosition = position;
+
+        ArticulationReducedSpace velocity =
+            body.jointVelocity;
+
+        velocity[0] = 0.0f;
+
+        body.jointVelocity = velocity;
     }
 }

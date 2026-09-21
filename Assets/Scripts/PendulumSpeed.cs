@@ -5,7 +5,11 @@ public class PendulumSpeed : MonoBehaviour
     [SerializeField]
     private float speed;
 
+    [SerializeField]
+    private Vector3 velocity;
+
     public float Speed => speed;
+    public Vector3 Velocity => velocity;
 
     private Vector3 previousPosition;
 
@@ -16,11 +20,19 @@ public class PendulumSpeed : MonoBehaviour
 
     private void FixedUpdate()
     {
-        speed = Vector3.Distance(
-            transform.position,
-            previousPosition
-        ) / Time.fixedDeltaTime;
+        velocity =
+            (transform.position - previousPosition)
+            / Time.fixedDeltaTime;
+
+        speed = velocity.magnitude;
 
         previousPosition = transform.position;
+    }
+
+    public void ResetMeasurement()
+    {
+        previousPosition = transform.position;
+        velocity = Vector3.zero;
+        speed = 0.0f;
     }
 }

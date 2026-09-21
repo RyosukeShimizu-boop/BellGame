@@ -2,9 +2,24 @@ using UnityEngine;
 
 public class BellHitDetector : MonoBehaviour
 {
+    [Header("HitPoint References")]
     [SerializeField]
     private PendulumSpeed pendulumSpeed;
 
+    [SerializeField]
+    private Collider hitPointCollider;
+
+    [Header("Bell Physics")]
+    [SerializeField]
+    private Rigidbody bellRigidbody;
+
+    [SerializeField]
+    private float impactMultiplier = 1.0f;
+
+    [SerializeField]
+    private float maximumImpulse = 20.0f;
+
+    [Header("Hit Settings")]
     [SerializeField]
     private float minimumHitSpeed = 1.0f;
 
@@ -12,7 +27,14 @@ public class BellHitDetector : MonoBehaviour
     private float hitCooldown = 0.2f;
 
     private float cooldownTimer;
-    private bool isInsideBell;
+
+    private void Awake()
+    {
+        if (bellRigidbody == null)
+        {
+            bellRigidbody = GetComponent<Rigidbody>();
+        }
+    }
 
     private void FixedUpdate()
     {
@@ -24,18 +46,23 @@ public class BellHitDetector : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"Trigger Enter: {other.name}");
-
-        if (!other.CompareTag("Bell"))
+        if (hitPointCollider != null &&
+            other != hitPointCollider)
         {
             return;
         }
 
-        isInsideBell = true;
-
         if (cooldownTimer > 0.0f)
         {
-            Debug.Log("鐘に入ったがクールタイム中");
+            return;
+        }
+
+        if (pendulumSpeed == null ||
+            bellRigidbody == null)
+        {
+            Debug.LogError(
+                "PendulumSpeedまたはBellのRigidbodyが未設定です。"
+            );
             return;
         }
 
@@ -44,29 +71,55 @@ public class BellHitDetector : MonoBehaviour
         if (hitSpeed < minimumHitSpeed)
         {
             Debug.Log(
-                $"弱い接触のため無効。先端速度: {hitSpeed:F2}"
+                $"弱い接触のため無効。速度: {hitSpeed:F2}"
             );
             return;
         }
 
+        Vector3 hitVelocity =
+            pendulumSpeed.Velocity;
+
+        // 2D画面外へ動かないようZ成分を除外
+        hitVelocity.z = 0.0f;
+
+        if (hitVelocity.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        Vector3 hitDirection =
+            hitVelocity.normalized;
+
+        float impulseStrength = Mathf.Min(
+            hitSpeed * impactMultiplier,
+            maximumImpulse
+        );
+
+        Vector3 impulse =
+            hitDirection * impulseStrength;
+
+        bellRigidbody.AddForce(
+            impulse,
+            ForceMode.Impulse
+        );
+
         cooldownTimer = hitCooldown;
 
         Debug.Log(
-            $"有効な鐘ヒット！先端速度: {hitSpeed:F2}"
+            $"鐘ヒット！速度: {hitSpeed:F2}, " +
+            $"方向: {hitDirection}, " +
+            $"反動: {impulseStrength:F2}"
         );
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log($"Trigger Exit: {other.name}");
-
-        if (!other.CompareTag("Bell"))
+        if (hitPointCollider != null &&
+            other != hitPointCollider)
         {
             return;
         }
 
-        isInsideBell = false;
-
-        Debug.Log("HitPointが鐘の判定範囲から退出");
+        Debug.Log("HitPointがBellから退出");
     }
 }
