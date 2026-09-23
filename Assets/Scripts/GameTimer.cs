@@ -90,6 +90,14 @@ public class GameTimer : MonoBehaviour
     private bool isGameFinished;
     private int totalBenefit;
 
+    [Header("Sunrise Background")]
+    [SerializeField]
+    private GameObject sunriseBackground;
+
+    [Header("Benefit BGM")]
+    [SerializeField]
+    private AudioSource benefitBgmSource;
+
     public bool IsBenefitTime => isBenefitTime;
     public bool IsGameFinished => isGameFinished;
     public int TotalBenefit => totalBenefit;
@@ -111,6 +119,11 @@ public class GameTimer : MonoBehaviour
         if (breakPanel != null)
         {
             breakPanel.SetActive(false);
+        }
+
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(false);
         }
     }
 
@@ -173,11 +186,21 @@ public class GameTimer : MonoBehaviour
             bellObject.SetActive(true);
         }
 
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(false);
+        }
+
         UpdateTimerText();
     }
 
     public void StopTimer()
     {
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(false);
+        }
+
         isRunning = false;
     }
 
@@ -218,9 +241,18 @@ public class GameTimer : MonoBehaviour
             bellObject.SetActive(true);
         }
 
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(false);
+        }
+
+        if (benefitBgmSource != null)
+        {
+            benefitBgmSource.Stop();
+        }
+
         UpdateTimerText();
     }
-
 
     private void TimeUp()
     {
@@ -309,7 +341,12 @@ public class GameTimer : MonoBehaviour
 
         if (breakMessage != null)
         {
-            breakMessage.text = "鐘木が折れた";
+            breakMessage.text = "折れた";
+        }
+
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(false);
         }
 
         // BreakPanelへ切り替える
@@ -317,12 +354,7 @@ public class GameTimer : MonoBehaviour
         {
             breakPanel.SetActive(true);
         }
-
-        Debug.Log(
-            "速度超過により鐘木が折れました。"
-        );
     }
-
 
     public void StartBenefitTime()
     {
@@ -339,24 +371,32 @@ public class GameTimer : MonoBehaviour
         // 制限時間を10秒追加
         remainingTime += bonusTime;
 
-        // スローと文字演出
+        // 日の出背景を表示
+        if (sunriseBackground != null)
+        {
+            sunriseBackground.SetActive(true);
+        }
+
+        // ご利益タイム用BGMを最初から再生
+        if (benefitBgmSource != null)
+        {
+            benefitBgmSource.Stop();
+            benefitBgmSource.time = 0.0f;
+            benefitBgmSource.Play();
+        }
+
+        // スーパーご利益タイム演出
         if (superBenefitEffect != null)
         {
             superBenefitEffect.PlayEffect();
-        }
-        else
-        {
-            Debug.LogError(
-                "GameTimerのSuper Benefit Effectが未設定です。"
-            );
         }
 
         UpdateTimerText();
         UpdateBenefitText();
 
         Debug.Log(
-            $"スーパーご利益タイム開始。" +
-            $"残り時間に{bonusTime:F0}秒追加"
+            $"スーパーご利益タイム開始。残り時間に" +
+            $"{bonusTime:F0}秒追加"
         );
     }
     public void AddBenefit(int damage)

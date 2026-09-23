@@ -77,6 +77,32 @@ public class PendulumSetupController : MonoBehaviour
     [SerializeField]
     private GameObject rightButton;
 
+    [Header("Mass By Length")]
+    [SerializeField]
+    private float firstMassPerUnit = 0.5f;
+
+    [SerializeField]
+    private float secondMassPerUnit = 0.5f;
+
+    [SerializeField]
+    private float minimumMass = 0.2f;
+
+    [SerializeField]
+    private float maximumMass = 10.0f;
+
+    [Header("Joint Visual")]
+    [SerializeField]
+    private Transform jointVisual;
+
+    [SerializeField]
+    private float jointVisualOffsetX = 0.0f;
+
+    [SerializeField]
+    private float jointVisualOffsetY = 0.0f;
+
+    [SerializeField]
+    private float jointVisualPositionZ = -0.5f;
+
     private DragTarget currentDragTarget;
     private bool setupMode = true;
 
@@ -100,6 +126,9 @@ public class PendulumSetupController : MonoBehaviour
     private Vector3 savedHitPointPosition;
 
     private bool hasSavedSetup;
+
+    private float savedFirstMass;
+    private float savedSecondMass;
 
     private void Awake()
     {
@@ -323,12 +352,31 @@ public class PendulumSetupController : MonoBehaviour
         secondPendulum.parentAnchorPosition =
             new Vector3(0.0f, -length, 0.0f);
 
+        if (jointVisual != null)
+        {
+            jointVisual.localPosition =
+                new Vector3(
+                    jointVisualOffsetX,
+                    -length + jointVisualOffsetY,
+                    jointVisualPositionZ
+                );
+
+            // 親の伸縮などが残っていても画像サイズを一定に保つ
+            jointVisual.localScale =
+                Vector3.one;
+        }
+
         // 親側と子側の関節軸を統一
         secondPendulum.anchorRotation =
             Quaternion.Euler(0.0f, 90.0f, 0.0f);
 
         secondPendulum.parentAnchorRotation =
             Quaternion.Euler(0.0f, 90.0f, 0.0f);
+
+        // 変更したColliderとMassから物理特性を再計算
+        Physics.SyncTransforms();
+        RefreshFirstPendulumPhysics();
+
     }
 
     private void ApplySecondLength(float length)
@@ -367,6 +415,10 @@ public class PendulumSetupController : MonoBehaviour
                 -length,
                 0.0f
             );
+
+        // 変更したColliderとMassから物理特性を再計算
+        Physics.SyncTransforms();
+        RefreshSecondPendulumPhysics();
     }
 
     private void SetJointAngle(
@@ -420,6 +472,39 @@ public class PendulumSetupController : MonoBehaviour
         secondPendulum.angularVelocity = Vector3.zero;
     }
 
+    private void RefreshFirstPendulumPhysics()
+    {
+        if (firstPendulum == null)
+        {
+            return;
+        }
+
+        firstPendulum.ResetCenterOfMass();
+        firstPendulum.ResetInertiaTensor();
+    }
+
+    private void RefreshSecondPendulumPhysics()
+    {
+        if (secondPendulum == null)
+        {
+            return;
+        }
+
+        secondPendulum.ResetCenterOfMass();
+        secondPendulum.ResetInertiaTensor();
+    }
+
+    private void RefreshAllPendulumPhysics()
+    {
+        Physics.SyncTransforms();
+
+        RefreshFirstPendulumPhysics();
+        RefreshSecondPendulumPhysics();
+
+        Physics.SyncTransforms();
+    }
+
+
     public void StartSimulation()
     {
         if (!setupMode)
@@ -427,14 +512,18 @@ public class PendulumSetupController : MonoBehaviour
             return;
         }
 
-        /*
-         * 必ず物理開始前に現在の設定を保存する。
-         * STOP時には、この状態へ戻す。
-         */
         SaveCurrentSetup();
 
         setupMode = false;
         currentDragTarget = DragTarget.None;
+
+        StopPhysics();
+
+        /*
+         * START直前の最終的なCollider、Mass、
+         * Anchorの状態を物理エンジンへ反映する。
+         */
+        RefreshAllPendulumPhysics();
 
         StopPhysics();
 
@@ -546,6 +635,12 @@ public class PendulumSetupController : MonoBehaviour
         savedHitPointPosition =
             hammerHandle.localPosition;
 
+        savedFirstMass =
+            firstPendulum.mass;
+
+        savedSecondMass =
+            secondPendulum.mass;
+
         hasSavedSetup = true;
     }
 
@@ -602,6 +697,12 @@ public class PendulumSetupController : MonoBehaviour
         secondCollider.size =
             savedSecondColliderSize;
 
+        firstPendulum.mass =
+            savedFirstMass;
+
+        secondPendulum.mass =
+            savedSecondMass;
+
         secondPendulum.matchAnchors = false;
 
         secondPendulum.anchorPosition =
@@ -613,7 +714,6 @@ public class PendulumSetupController : MonoBehaviour
         hammerHandle.localPosition =
             savedHitPointPosition;
 
-        // 関節角度を復元
         SetJointPositionRadians(
             firstPendulum,
             savedFirstJointAngle
@@ -623,6 +723,9 @@ public class PendulumSetupController : MonoBehaviour
             secondPendulum,
             savedSecondJointAngle
         );
+
+        // 復元したCollider形状から物理特性を再計算
+        RefreshAllPendulumPhysics();
 
         StopPhysics();
     }
