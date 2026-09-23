@@ -3158,7 +3158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bbeb71f78f58a49b8b676ef2c4c5d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maximumHealth: 1
+  maximumHealth: 108
   currentHealth: 0
   healthBar: {fileID: 235714086}
   healthText: {fileID: 889710024}
@@ -5360,7 +5360,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1479436233
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5491,7 +5491,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 6682738439518977790, guid: 6efb1f5762d2f6843b65a03083d21e50, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
