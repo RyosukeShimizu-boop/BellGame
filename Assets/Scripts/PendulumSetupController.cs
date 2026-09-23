@@ -70,6 +70,13 @@ public class PendulumSetupController : MonoBehaviour
     [SerializeField]
     private GameObject stopButton;
 
+    [Header("UI")]
+    [SerializeField]
+    private GameObject leftButton;
+
+    [SerializeField]
+    private GameObject rightButton;
+
     private DragTarget currentDragTarget;
     private bool setupMode = true;
 
@@ -420,6 +427,10 @@ public class PendulumSetupController : MonoBehaviour
             return;
         }
 
+        /*
+         * 必ず物理開始前に現在の設定を保存する。
+         * STOP時には、この状態へ戻す。
+         */
         SaveCurrentSetup();
 
         setupMode = false;
@@ -439,10 +450,27 @@ public class PendulumSetupController : MonoBehaviour
         {
             stopButton.SetActive(true);
         }
+
+        if (leftButton != null)
+        {
+            leftButton.SetActive(false);
+        }
+
+        if (rightButton != null)
+        {
+            rightButton.SetActive(false);
+        }
     }
 
     public void StopSimulation()
     {
+        // 先に重力と現在の速度を止める
+        firstPendulum.useGravity = false;
+        secondPendulum.useGravity = false;
+
+        StopPhysics();
+
+        // STARTを押した瞬間に保存した状態へ戻す
         RestoreSavedSetup();
 
         setupMode = true;
@@ -457,8 +485,17 @@ public class PendulumSetupController : MonoBehaviour
         {
             stopButton.SetActive(false);
         }
-    }
 
+        if (leftButton != null)
+        {
+            leftButton.SetActive(true);
+        }
+
+        if (rightButton != null)
+        {
+            rightButton.SetActive(true);
+        }
+    }
     private void SaveCurrentSetup()
     {
         savedRootPosition =
@@ -612,5 +649,16 @@ public class PendulumSetupController : MonoBehaviour
         velocity[0] = 0.0f;
 
         body.jointVelocity = velocity;
+    }
+
+    public void FreezeSimulation()
+    {
+        setupMode = false;
+        currentDragTarget = DragTarget.None;
+
+        firstPendulum.useGravity = false;
+        secondPendulum.useGravity = false;
+
+        StopPhysics();
     }
 }
