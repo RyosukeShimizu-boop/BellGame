@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PendulumSetupController : MonoBehaviour
 {
@@ -103,6 +104,12 @@ public class PendulumSetupController : MonoBehaviour
     [SerializeField]
     private float jointVisualPositionZ = -0.5f;
 
+    [SerializeField]
+    private GameObject hammerButton;
+
+    [SerializeField]
+    private GameObject woodButton;
+
     private DragTarget currentDragTarget;
     private bool setupMode = true;
 
@@ -165,21 +172,35 @@ public class PendulumSetupController : MonoBehaviour
             return;
         }
 
-        Vector3 mouseWorldPosition = GetMouseWorldPosition();
+        // UIを押している時は
+        // 振り子操作を無効化
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
+        Vector3 mouseWorldPosition =
+            GetMouseWorldPosition();
 
         if (Input.GetMouseButtonDown(0))
         {
-            SelectDragTarget(mouseWorldPosition);
+            SelectDragTarget(
+                mouseWorldPosition
+            );
         }
 
         if (Input.GetMouseButton(0))
         {
-            UpdateDraggedPart(mouseWorldPosition);
+            UpdateDraggedPart(
+                mouseWorldPosition
+            );
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            currentDragTarget = DragTarget.None;
+            currentDragTarget =
+                DragTarget.None;
         }
     }
 
@@ -549,6 +570,16 @@ public class PendulumSetupController : MonoBehaviour
         {
             rightButton.SetActive(false);
         }
+
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(false);
+        }
+
+        if (woodButton != null)
+        {
+            woodButton.SetActive(false);
+        }
     }
 
     public void StopSimulation()
@@ -583,6 +614,16 @@ public class PendulumSetupController : MonoBehaviour
         if (rightButton != null)
         {
             rightButton.SetActive(true);
+        }
+
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(true);
+        }
+
+        if (woodButton != null)
+        {
+            woodButton.SetActive(true);
         }
     }
     private void SaveCurrentSetup()
