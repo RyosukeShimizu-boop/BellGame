@@ -1,4 +1,8 @@
 using UnityEngine;
+// ======================================= //
+// BellHitDetector.cs
+// HitPointがBellに当たった時の処理
+// ======================================= //
 
 public class BellHitDetector : MonoBehaviour
 {
@@ -60,6 +64,7 @@ public class BellHitDetector : MonoBehaviour
 
     private bool hitDetectionEnabled;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         if (bellRigidbody == null)
@@ -78,6 +83,7 @@ public class BellHitDetector : MonoBehaviour
         hitDetectionEnabled = false;
     }
 
+    // 当たり判定のクール時間処理
     private void FixedUpdate()
     {
         if (cooldownTimer > 0.0f)
@@ -86,13 +92,16 @@ public class BellHitDetector : MonoBehaviour
         }
     }
 
+    // 当たった際の処理
     private void OnTriggerEnter(Collider other)
     {
+        // START前なら終了
         if (!hitDetectionEnabled)
         {
             return;
         }
 
+        // HitPointと衝突したか確認
         if (hitPointCollider != null &&
             other != hitPointCollider)
         {
@@ -113,12 +122,15 @@ public class BellHitDetector : MonoBehaviour
             return;
         }
 
+        // 衝突時の速度を取得
         float hitSpeed = pendulumSpeed.Speed;
 
+        // 基準値より弱い衝突は無視
         if (hitSpeed < minimumHitSpeed)
         {
             return;
         }
+
 
         Vector3 hitVelocity =
             pendulumSpeed.Velocity;
@@ -131,26 +143,32 @@ public class BellHitDetector : MonoBehaviour
             return;
         }
 
+        // 衝突時のHitPointの角度を獲得
         Vector3 hitDirection =
             hitVelocity.normalized;
 
+        // 鐘に与える衝撃の強さ
         float impulseStrength = Mathf.Min(
             hitSpeed * impactMultiplier,
             maximumImpulse
         );
 
+        // 方向と強さを合体
         Vector3 impulse =
             hitDirection * impulseStrength;
 
+        // 鐘を動かす
         bellRigidbody.AddForce(
             impulse,
             ForceMode.Impulse
         );
 
+        // 速度からダメージを計算する処理
         int damage = CalculateDamage(hitSpeed);
 
         if (damage > 0)
         {
+            // 煩悩-かご利益+か判定
             if (gameTimer != null &&
                 gameTimer.IsBenefitTime)
             {
@@ -174,6 +192,7 @@ public class BellHitDetector : MonoBehaviour
             }
         }
 
+        // SE再生
         if (damage > 0 &&
             audioSource != null &&
             bellHitClip != null)
@@ -184,6 +203,7 @@ public class BellHitDetector : MonoBehaviour
             );
         }
 
+        // カメラを揺らす
         if (damage > 0 &&
             cameraShake != null)
         {
@@ -192,6 +212,7 @@ public class BellHitDetector : MonoBehaviour
             );
         }
 
+        // ダメージ表記を出す
         if (damage > 0 &&
             damagePopupSpawner != null)
         {
@@ -218,6 +239,7 @@ public class BellHitDetector : MonoBehaviour
         }
     }
 
+    // 衝突時の速度からダメージを計算 //
     private int CalculateDamage(float hitSpeed)
     {
         if (hitSpeed < 1.0f)
@@ -316,6 +338,7 @@ public class BellHitDetector : MonoBehaviour
         return Mathf.RoundToInt(calculatedDamage);
     }
 
+    // 鐘の当たり判定を有効化 //
     public void EnableHitDetection()
     {
         hitDetectionEnabled = true;
@@ -324,6 +347,7 @@ public class BellHitDetector : MonoBehaviour
         Debug.Log("Bellのヒット判定を有効化");
     }
 
+    // 鐘の当たり判定を無効化 //
     public void DisableHitDetection()
     {
         hitDetectionEnabled = false;

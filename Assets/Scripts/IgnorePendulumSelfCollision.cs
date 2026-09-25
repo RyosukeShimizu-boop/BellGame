@@ -1,4 +1,8 @@
 using UnityEngine;
+// ======================================= //
+// IgnorePendulumSelfCollision.cs
+// U‚èq“¯m‚ª‚Ô‚Â‚©‚ç‚È‚¢‚æ‚¤‚É‚·‚éˆ—
+// ======================================= //
 
 public class IgnorePendulumSelfCollision : MonoBehaviour
 {
@@ -11,6 +15,7 @@ public class IgnorePendulumSelfCollision : MonoBehaviour
     [SerializeField]
     private Collider hitPointCollider;
 
+    // ƒQ[ƒ€ŠJnˆ— //
     private void Awake()
     {
         if (firstPendulumCollider != null &&

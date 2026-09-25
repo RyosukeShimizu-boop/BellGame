@@ -1,6 +1,10 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+// ======================================= //
+// SuperBenefitTimeEffect.cs
+// スーパーご利益タイム演出処理
+// ======================================= //
 
 public class SuperBenefitEffect : MonoBehaviour
 {
@@ -42,6 +46,7 @@ public class SuperBenefitEffect : MonoBehaviour
     private float originalTimeScale;
     private float originalFixedDeltaTime;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         originalTimeScale = 1.0f;
@@ -56,14 +61,11 @@ public class SuperBenefitEffect : MonoBehaviour
         }
     }
 
+    // 演出開始処理 //
     public void PlayEffect()
     {
         if (messageText == null)
         {
-            Debug.LogError(
-                "SuperBenefitEffectのMessage Textが未設定です。"
-            );
-
             return;
         }
 
@@ -84,6 +86,7 @@ public class SuperBenefitEffect : MonoBehaviour
             StartCoroutine(PlayEffectRoutine());
     }
 
+    // 「スーパーご利益タイム」開始時処理 //
     private IEnumerator PlayEffectRoutine()
     {
         messageText.text =
@@ -142,6 +145,7 @@ public class SuperBenefitEffect : MonoBehaviour
         playCoroutine = null;
     }
 
+    // 文字を移動させる処理 //
     private IEnumerator MoveTextRoutine(
         float fromX,
         float toX,
@@ -157,13 +161,16 @@ public class SuperBenefitEffect : MonoBehaviour
 
         while (elapsedTime < duration)
         {
+            // ゲーム速度を無視した本当の経過時間
             elapsedTime +=
                 Time.unscaledDeltaTime;
 
+            // 進行率
             float rate = Mathf.Clamp01(
                 elapsedTime / duration
             );
 
+            // 文字の移動する様子をスロー→普通→スローにする
             float smoothRate =
                 Mathf.SmoothStep(
                     0.0f,
@@ -171,6 +178,7 @@ public class SuperBenefitEffect : MonoBehaviour
                     rate
                 );
 
+            // 現在位置計算
             float currentX = Mathf.Lerp(
                 fromX,
                 toX,
@@ -185,6 +193,7 @@ public class SuperBenefitEffect : MonoBehaviour
         SetTextPositionX(toX);
     }
 
+    // テキストのポジションを変更する処理 //
     private void SetTextPositionX(float positionX)
     {
         if (messageRectTransform == null)
@@ -201,6 +210,7 @@ public class SuperBenefitEffect : MonoBehaviour
             position;
     }
 
+    // スローにする処理 //
     private void StartSlowMotion()
     {
         Time.timeScale = slowTimeScale;
@@ -210,6 +220,7 @@ public class SuperBenefitEffect : MonoBehaviour
             slowTimeScale;
     }
 
+    // スロー解除 //
     private void RestoreTimeScale()
     {
         Time.timeScale = originalTimeScale;
@@ -217,6 +228,7 @@ public class SuperBenefitEffect : MonoBehaviour
             originalFixedDeltaTime;
     }
 
+    // 演出終了(STOPボタンを押した時)
     public void ResetEffect()
     {
         if (playCoroutine != null)
@@ -235,6 +247,7 @@ public class SuperBenefitEffect : MonoBehaviour
         SetTextPositionX(startPositionX);
     }
 
+    // スロー状態を残さないように //
     private void OnDisable()
     {
         /*
@@ -244,6 +257,7 @@ public class SuperBenefitEffect : MonoBehaviour
         RestoreTimeScale();
     }
 
+    // スロー状態を残さないように //
     private void OnDestroy()
     {
         RestoreTimeScale();

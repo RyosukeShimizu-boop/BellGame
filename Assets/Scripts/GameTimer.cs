@@ -1,5 +1,9 @@
 using TMPro;
 using UnityEngine;
+// ======================================= //
+// GameTimer.cs
+// ゲーム全体の進行管理を処理
+// ======================================= //
 
 public class GameTimer : MonoBehaviour
 {
@@ -102,10 +106,12 @@ public class GameTimer : MonoBehaviour
     public bool IsGameFinished => isGameFinished;
     public int TotalBenefit => totalBenefit;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         ResetTimer();
 
+        // 全パネル非表示
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -121,12 +127,14 @@ public class GameTimer : MonoBehaviour
             breakPanel.SetActive(false);
         }
 
+        // 日の出背景非表示
         if (sunriseBackground != null)
         {
             sunriseBackground.SetActive(false);
         }
     }
 
+    // 更新処理 //
     private void Update()
     {
         if (!isRunning || isGameFinished)
@@ -136,6 +144,7 @@ public class GameTimer : MonoBehaviour
 
         remainingTime -= Time.deltaTime;
 
+        // 時間切れ処理
         if (remainingTime <= 0.0f)
         {
             remainingTime = 0.0f;
@@ -146,9 +155,11 @@ public class GameTimer : MonoBehaviour
             return;
         }
 
+        // タイマーテキスト更新
         UpdateTimerText();
     }
 
+    // タイマースタート(STARTボタンで呼び出し) //
     public void StartTimer()
     {
         remainingTime = timeLimit;
@@ -160,6 +171,7 @@ public class GameTimer : MonoBehaviour
 
         totalBenefit = 0;
 
+        // 全パネル非表示
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -175,27 +187,33 @@ public class GameTimer : MonoBehaviour
             breakPanel.SetActive(false);
         }
 
+        // 「ご利益」テキスト非表示
         if (benefitText != null)
         {
             benefitText.gameObject.SetActive(false);
             benefitText.text = "ご利益 0";
         }
 
+        // 鐘有効化
         if (bellObject != null)
         {
             bellObject.SetActive(true);
         }
 
+        // 日の出背景非表示
         if (sunriseBackground != null)
         {
             sunriseBackground.SetActive(false);
         }
 
+        // タイマー更新
         UpdateTimerText();
     }
 
+    // タイマーストップ(STOPボタンで呼び出し) //
     public void StopTimer()
     {
+        // 日の出背景非表示
         if (sunriseBackground != null)
         {
             sunriseBackground.SetActive(false);
@@ -204,6 +222,7 @@ public class GameTimer : MonoBehaviour
         isRunning = false;
     }
 
+    // タイマーリセット(STOPボタンで呼び出し) //
     public void ResetTimer()
     {
         remainingTime = timeLimit;
@@ -215,6 +234,7 @@ public class GameTimer : MonoBehaviour
 
         totalBenefit = 0;
 
+        // 全パネル非表示
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -230,30 +250,36 @@ public class GameTimer : MonoBehaviour
             breakPanel.SetActive(false);
         }
 
+        // 「ご利益」文字非表示
         if (benefitText != null)
         {
             benefitText.gameObject.SetActive(false);
             benefitText.text = "ご利益 0";
         }
 
+        // 鐘表示
         if (bellObject != null)
         {
             bellObject.SetActive(true);
         }
 
+        // 日の出背景非表示
         if (sunriseBackground != null)
         {
             sunriseBackground.SetActive(false);
         }
 
+        // ご利益タイムBGMストップ
         if (benefitBgmSource != null)
         {
             benefitBgmSource.Stop();
         }
 
+        // タイマーテキスト更新
         UpdateTimerText();
     }
 
+    // タイムアップ処理 //
     private void TimeUp()
     {
         if (isGameFinished)
@@ -265,7 +291,7 @@ public class GameTimer : MonoBehaviour
         isTimeUp = true;
         isGameFinished = true;
 
-        // HPを0にできていた場合
+        // クリアかどうか判定
         if (isBenefitTime)
         {
             ShowGameClear();
@@ -276,6 +302,7 @@ public class GameTimer : MonoBehaviour
         }
     }
 
+    // タイマーテキスト更新処理 //
     private void UpdateTimerText()
     {
         if (timeText == null)
@@ -287,6 +314,7 @@ public class GameTimer : MonoBehaviour
             $"年明けまであと {remainingTime:F0}";
     }
 
+    // 折れた際のパネル表示 //
     public void SpeedOverGameOver()
     {
         if (isGameFinished)
@@ -356,6 +384,7 @@ public class GameTimer : MonoBehaviour
         }
     }
 
+    // スーパーご利益タイムスタート処理 //
     public void StartBenefitTime()
     {
         if (!isRunning ||
@@ -391,31 +420,21 @@ public class GameTimer : MonoBehaviour
             superBenefitEffect.PlayEffect();
         }
 
+        // テキスト関連更新処理
         UpdateTimerText();
         UpdateBenefitText();
-
-        Debug.Log(
-            $"スーパーご利益タイム開始。残り時間に" +
-            $"{bonusTime:F0}秒追加"
-        );
     }
+    
+    // ご利益追加処理 //
     public void AddBenefit(int damage)
     {
         if (!isRunning)
         {
-            Debug.LogWarning(
-                "タイマー停止中のため、ご利益を加算できません。"
-            );
-
             return;
         }
 
         if (!isBenefitTime)
         {
-            Debug.LogWarning(
-                "ご利益タイムではありません。"
-            );
-
             return;
         }
 
@@ -433,14 +452,11 @@ public class GameTimer : MonoBehaviour
 
         totalBenefit += damage;
 
+        // テキスト更新処理
         UpdateBenefitText();
-
-        Debug.Log(
-            $"ご利益 +{damage}、" +
-            $"合計ご利益: {totalBenefit}"
-        );
     }
 
+    // 「ご利益」文字更新処理 //
     private void UpdateBenefitText()
     {
         if (benefitText == null)
@@ -464,11 +480,9 @@ public class GameTimer : MonoBehaviour
         }
     }
 
+    // クリアパネル表示処理 //
     private void ShowGameClear()
     {
-        Debug.Log(
-            $"ゲームクリア。最終ご利益: {totalBenefit}"
-        );
 
         // 通常のゲームオーバーPanelは隠す
         if (gameOverPanel != null)
@@ -504,6 +518,7 @@ public class GameTimer : MonoBehaviour
         }
     }
 
+    // 煩悩が残っていた時のパネル表示処理 //
     private void ShowTimeUpResult()
     {
         Debug.Log("時間切れ");

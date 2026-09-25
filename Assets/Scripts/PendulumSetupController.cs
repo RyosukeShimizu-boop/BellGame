@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+// ======================================= //
+// PendulumSetUpController.cs
+// 二重振り子全般処理
+// ======================================= //
 
 public class PendulumSetupController : MonoBehaviour
 {
@@ -137,6 +141,7 @@ public class PendulumSetupController : MonoBehaviour
     private float savedFirstMass;
     private float savedSecondMass;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         if (mainCamera == null)
@@ -165,6 +170,7 @@ public class PendulumSetupController : MonoBehaviour
         }
     }
 
+    // 更新処理 //
     private void Update()
     {
         if (!setupMode)
@@ -204,8 +210,10 @@ public class PendulumSetupController : MonoBehaviour
         }
     }
 
+    // ドラッグ対象決定 //
     private void SelectDragTarget(Vector3 mouseWorldPosition)
     {
+        // クリック位置と対象位置を計算
         float firstJointDistance = Vector2.Distance(
             mouseWorldPosition,
             firstJointHandle.position
@@ -216,6 +224,7 @@ public class PendulumSetupController : MonoBehaviour
             hammerHandle.position
         );
 
+        // ドラッグ対象を決定
         if (hammerDistance <= handleRadius)
         {
             currentDragTarget = DragTarget.Hammer;
@@ -231,6 +240,7 @@ public class PendulumSetupController : MonoBehaviour
         currentDragTarget = DragTarget.None;
     }
 
+    // ドラッグ更新処理 //
     private void UpdateDraggedPart(Vector3 mouseWorldPosition)
     {
         switch (currentDragTarget)
@@ -245,6 +255,7 @@ public class PendulumSetupController : MonoBehaviour
         }
     }
 
+    // 第一間接更新処理 //
     private void UpdateFirstPendulum(Vector3 mouseWorldPosition)
     {
         Vector3 rootPosition = transform.position;
@@ -267,7 +278,6 @@ public class PendulumSetupController : MonoBehaviour
             rootPosition.z
         );
 
-        // 1st�̃��[���h�p�x
         float worldAngle =
             Mathf.Atan2(
                 normalizedDirection.y,
@@ -337,6 +347,7 @@ public class PendulumSetupController : MonoBehaviour
         StopPhysics();
     }
 
+    // 第一関節の長さを変更する処理 //
     private void ApplyFirstLength(float length)
     {
         // 1stの見た目
@@ -400,6 +411,7 @@ public class PendulumSetupController : MonoBehaviour
 
     }
 
+    // 第二関節の長さを変更する処理 //
     private void ApplySecondLength(float length)
     {
         secondVisual.localPosition =
@@ -442,6 +454,7 @@ public class PendulumSetupController : MonoBehaviour
         RefreshSecondPendulumPhysics();
     }
 
+    // 角度設定 //
     private void SetJointAngle(
     ArticulationBody body,
     float angleDegrees)
@@ -462,6 +475,7 @@ public class PendulumSetupController : MonoBehaviour
         body.jointPosition = jointPosition;
     }
 
+    // マウスの位置獲得 //
     private Vector3 GetMouseWorldPosition()
     {
         Plane movementPlane =
@@ -484,6 +498,7 @@ public class PendulumSetupController : MonoBehaviour
         return transform.position;
     }
 
+    // 物理演算終了 //
     private void StopPhysics()
     {
         firstPendulum.linearVelocity = Vector3.zero;
@@ -493,6 +508,7 @@ public class PendulumSetupController : MonoBehaviour
         secondPendulum.angularVelocity = Vector3.zero;
     }
 
+    // 1stの重心と慣性再計算 //
     private void RefreshFirstPendulumPhysics()
     {
         if (firstPendulum == null)
@@ -504,6 +520,7 @@ public class PendulumSetupController : MonoBehaviour
         firstPendulum.ResetInertiaTensor();
     }
 
+    // 2ndの重心と慣性再計算 //
     private void RefreshSecondPendulumPhysics()
     {
         if (secondPendulum == null)
@@ -515,6 +532,7 @@ public class PendulumSetupController : MonoBehaviour
         secondPendulum.ResetInertiaTensor();
     }
 
+    // 重心と慣性再計算 //
     private void RefreshAllPendulumPhysics()
     {
         Physics.SyncTransforms();
@@ -525,7 +543,7 @@ public class PendulumSetupController : MonoBehaviour
         Physics.SyncTransforms();
     }
 
-
+    // シミュレーション開始(STARTボタンを押した時) //
     public void StartSimulation()
     {
         if (!setupMode)
@@ -582,6 +600,7 @@ public class PendulumSetupController : MonoBehaviour
         }
     }
 
+    // シミュレーション終了(STOPボタンを押した時) //
     public void StopSimulation()
     {
         // 先に重力と現在の速度を止める
@@ -626,6 +645,8 @@ public class PendulumSetupController : MonoBehaviour
             woodButton.SetActive(true);
         }
     }
+    
+    // シミュレーション開始時のPendulumRootの位置を保存(STARTボタンを押した時) //
     private void SaveCurrentSetup()
     {
         savedRootPosition =
@@ -685,6 +706,7 @@ public class PendulumSetupController : MonoBehaviour
         hasSavedSetup = true;
     }
 
+    // 保存したPendulumRootの位置をロード(STOPボタンを押した時) //
     private void RestoreSavedSetup()
     {
         if (!hasSavedSetup)
@@ -771,6 +793,7 @@ public class PendulumSetupController : MonoBehaviour
         StopPhysics();
     }
 
+    // 保存しておいた関節角度を復元する処理 //
     private void SetJointPositionRadians(
     ArticulationBody body,
     float angleRadians)
@@ -795,6 +818,7 @@ public class PendulumSetupController : MonoBehaviour
         body.jointVelocity = velocity;
     }
 
+    // シミュレーションを止める処理(速度超過で折れた時) //
     public void FreezeSimulation()
     {
         setupMode = false;

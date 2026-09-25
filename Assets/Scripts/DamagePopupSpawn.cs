@@ -1,4 +1,8 @@
 using UnityEngine;
+// ======================================= //
+// DamagePopupSpawner.cs
+// ダメージ表示を生成する処理
+// ======================================= //
 
 public class DamagePopupSpawner : MonoBehaviour
 {
@@ -19,6 +23,7 @@ public class DamagePopupSpawner : MonoBehaviour
 
     private RectTransform canvasRectTransform;
 
+    // ゲーム開始時処理
     private void Awake()
     {
         if (targetCanvas == null)
@@ -36,6 +41,7 @@ public class DamagePopupSpawner : MonoBehaviour
             targetCanvas.GetComponent<RectTransform>();
     }
 
+    // ダメージ表記を出現させる処理 //
     public void ShowDamage(
         int damage,
         Vector3 worldPosition)
@@ -51,6 +57,7 @@ public class DamagePopupSpawner : MonoBehaviour
             return;
         }
 
+        // Screen座標変換
         Vector3 screenPosition =
             mainCamera.WorldToScreenPoint(
                 worldPosition
@@ -71,6 +78,7 @@ public class DamagePopupSpawner : MonoBehaviour
                 targetCanvas.worldCamera;
         }
 
+        // UI座標変換
         RectTransformUtility
             .ScreenPointToLocalPointInRectangle(
                 canvasRectTransform,
@@ -79,20 +87,25 @@ public class DamagePopupSpawner : MonoBehaviour
                 out Vector2 localPosition
             );
 
+        // ダメージ表示出現処理
         DamagePopup popup = Instantiate(
             damagePopupPrefab,
             targetCanvas.transform
         );
-
+        
+        // 出現位置獲得
         RectTransform popupRect =
             popup.GetComponent<RectTransform>();
 
+        // 表示位置設定
         popupRect.anchoredPosition =
             localPosition + screenOffset;
 
+        // スケール初期化
         popupRect.localScale =
             Vector3.one;
 
+        // 出現処理
         popup.Initialize(damage);
     }
 }

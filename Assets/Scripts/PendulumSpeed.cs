@@ -1,5 +1,9 @@
 using TMPro;
 using UnityEngine;
+// ======================================= //
+// PendulumSpeed.cs
+// 振り子速度処理
+// ======================================= //
 
 public class PendulumSpeed : MonoBehaviour
 {
@@ -32,6 +36,7 @@ public class PendulumSpeed : MonoBehaviour
     public Vector3 Velocity => velocity;
     public float DangerousTimer => dangerousTimer;
 
+    // 開始時処理 //
     private void Start()
     {
         previousPosition = transform.position;
@@ -42,6 +47,7 @@ public class PendulumSpeed : MonoBehaviour
         }
     }
 
+    // 物理更新処理 //
     private void FixedUpdate()
     {
         velocity =
@@ -59,6 +65,7 @@ public class PendulumSpeed : MonoBehaviour
         UpdateDangerousSpeed();
     }
 
+    // 危険速度になった時の更新処理 //
     private void UpdateDangerousSpeed()
     {
         if (speed >= dangerousSpeed)
@@ -92,6 +99,7 @@ public class PendulumSpeed : MonoBehaviour
         }
     }
 
+    // 速度監視開始処理 //
     public void BeginSpeedMonitoring()
     {
         previousPosition = transform.position;
@@ -109,6 +117,7 @@ public class PendulumSpeed : MonoBehaviour
         }
     }
 
+    // 速度監視終了処理 //
     public void StopSpeedMonitoring()
     {
         monitoring = false;
@@ -117,6 +126,7 @@ public class PendulumSpeed : MonoBehaviour
         ResetDangerousState();
     }
 
+    // 速度計測を初期状態へ戻す処理 //
     public void ResetMeasurement()
     {
         previousPosition = transform.position;
@@ -131,6 +141,7 @@ public class PendulumSpeed : MonoBehaviour
         }
     }
 
+    // 「折れそう」文字表示処理 //
     private void UpdateDangerText()
     {
         if (dangerText == null)
@@ -157,6 +168,7 @@ public class PendulumSpeed : MonoBehaviour
             $"折れそう {displayNumber}";
     }
 
+    // 「折れそう」文字消す処理 //
     private void ResetDangerousState()
     {
         dangerousTimer = 0.0f;

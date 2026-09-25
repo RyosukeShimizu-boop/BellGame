@@ -1,5 +1,9 @@
 using TMPro;
 using UnityEngine;
+// ======================================= //
+// DamagePopup.cs
+// 与えたダメージを表示する処理
+// ======================================= //
 
 public class DamagePopup : MonoBehaviour
 {
@@ -40,6 +44,7 @@ public class DamagePopup : MonoBehaviour
     [SerializeField]
     private int largeDamageThreshold = 21;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         rectTransform =
@@ -55,18 +60,23 @@ public class DamagePopup : MonoBehaviour
             damageText.color;
     }
 
+    // 生成直後に呼び出す処理 //
     public void Initialize(int damage)
     {
+        // テキスト表示
         damageText.text = $"{damage}煩悩";
 
         elapsedTime = 0.0f;
 
+        // 出現場所を獲得
         startPosition =
             rectTransform.anchoredPosition;
 
+        // ダメージによって表示するサイズを変更
         damageText.fontSize =
             GetFontSize(damage);
 
+        // 初期スケール
         rectTransform.localScale =
             Vector3.one * startScale;
 
@@ -75,10 +85,13 @@ public class DamagePopup : MonoBehaviour
         damageText.color = color;
     }
 
+    // 更新処理 //
     private void Update()
     {
+        // 経過時間加算
         elapsedTime += Time.deltaTime;
 
+        // 進行率
         float rate = Mathf.Clamp01(
             elapsedTime / lifeTime
         );
@@ -100,7 +113,6 @@ public class DamagePopup : MonoBehaviour
 
         // 後半で透明にする
         float alpha = 1.0f;
-
         if (rate >= 0.4f)
         {
             alpha = Mathf.InverseLerp(
@@ -120,6 +132,7 @@ public class DamagePopup : MonoBehaviour
         }
     }
 
+    // ダメージ別サイズ切り替え処理 //
     private float GetFontSize(int damage)
     {
         if (damage >= largeDamageThreshold)

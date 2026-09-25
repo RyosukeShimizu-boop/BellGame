@@ -1,5 +1,9 @@
 using System.Collections;
 using UnityEngine;
+// ======================================= //
+// CameraShake.cs
+// ƒ_ƒ[ƒW—Ê‚É‰‚¶‚ÄƒJƒƒ‰‚ğ—h‚ç‚·ˆ—
+// ======================================= //
 
 public class CameraShake : MonoBehaviour
 {
@@ -31,13 +35,16 @@ public class CameraShake : MonoBehaviour
     private Vector3 originalLocalPosition;
     private Coroutine shakeCoroutine;
 
+    // ƒQ[ƒ€ŠJnˆ— //
     private void Awake()
     {
         originalLocalPosition = transform.localPosition;
     }
 
+    // ÀÛ‚É—h‚ç‚·ˆ— //
     public void ShakeByDamage(int damage)
     {
+        // ƒ_ƒ[ƒW‚ğ0~1‚Ö•ÏŠ·‚·‚é
         float damageRate = Mathf.InverseLerp(
             minimumDamage,
             maximumDamage,
@@ -50,18 +57,21 @@ public class CameraShake : MonoBehaviour
             1.4f
         );
 
+        // —h‚ê‚Ì‹­‚³ŒvZ
         float strength = Mathf.Lerp(
             minimumStrength,
             maximumStrength,
             damageRate
         );
 
+        // —h‚ê‚ÌŠÔŒvZ
         float duration = Mathf.Lerp(
             minimumDuration,
             maximumDuration,
             damageRate
         );
 
+        // Šù‘¶‚Ì—h‚ê‚ğ’â~
         if (shakeCoroutine != null)
         {
             StopCoroutine(shakeCoroutine);
@@ -71,6 +81,7 @@ public class CameraShake : MonoBehaviour
         transform.localPosition =
             originalLocalPosition;
 
+        // —h‚êŠJn
         shakeCoroutine = StartCoroutine(
             ShakeCoroutine(
                 duration,
@@ -79,6 +90,7 @@ public class CameraShake : MonoBehaviour
         );
     }
 
+    // ÀÛ‚ÉƒJƒƒ‰‚ğ—h‚ç‚·ˆ— //
     private IEnumerator ShakeCoroutine(
         float duration,
         float strength)
@@ -142,6 +154,7 @@ public class CameraShake : MonoBehaviour
         shakeCoroutine = null;
     }
 
+    // —h‚ê‚ÅƒYƒŒ‚½ƒJƒƒ‰‚ÌˆÊ’u‚ğC³
     public void ResetCameraPosition()
     {
         if (shakeCoroutine != null)

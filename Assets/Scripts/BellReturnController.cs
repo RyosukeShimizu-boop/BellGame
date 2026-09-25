@@ -1,4 +1,8 @@
 using UnityEngine;
+// ======================================= //
+// BellReturnController.cs
+// 衝突時に移動した鐘を元の位置に戻す処理
+// ======================================= //
 
 [RequireComponent(typeof(Rigidbody))]
 public class BellReturnController : MonoBehaviour
@@ -21,16 +25,19 @@ public class BellReturnController : MonoBehaviour
     private Vector3 initialPosition;
     private Quaternion initialRotation;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
+        // 鐘の初期位置を獲得
         bellRigidbody = GetComponent<Rigidbody>();
-
         initialPosition = bellRigidbody.position;
         initialRotation = bellRigidbody.rotation;
     }
 
+    // 更新処理 //
     private void FixedUpdate()
     {
+        // 今がどれだけ初期位置からズレているか獲得
         Vector3 displacement =
             initialPosition - bellRigidbody.position;
 
@@ -46,9 +53,11 @@ public class BellReturnController : MonoBehaviour
             -bellRigidbody.linearVelocity
             * dampingStrength;
 
+        // 最終的な復元力
         Vector3 returnForce =
             springForce + dampingForce;
 
+        // 実際に反映
         bellRigidbody.AddForce(
             returnForce,
             ForceMode.Force
@@ -74,6 +83,7 @@ public class BellReturnController : MonoBehaviour
         }
     }
 
+    // 今すぐに元の位置に戻す処理(STOPボタンを押したとき) //
     public void ResetImmediately()
     {
         bellRigidbody.position =

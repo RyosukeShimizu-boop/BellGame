@@ -1,4 +1,9 @@
 using UnityEngine;
+// ======================================= //
+// CraneBoomController.cs
+// 実際にクレーンのアームを動かす処理
+// ======================================= //
+
 
 public class CraneBoomController : MonoBehaviour
 {
@@ -36,16 +41,20 @@ public class CraneBoomController : MonoBehaviour
     private bool moveRight;
     private bool setupMode = true;
 
+    // ゲーム開始時処理 //
     private void Start()
     {
+        // 現在位置から初期値を計算
         InitializeFromCurrentPosition();
 
+        // アーム表示を更新
         UpdateBoomVisual(
             cranePivot.position,
             GetPendulumConnectionPosition()
         );
     }
 
+    // 更新処理 //
     private void Update()
     {
         if (!setupMode)
@@ -70,18 +79,22 @@ public class CraneBoomController : MonoBehaviour
             return;
         }
 
+        // 角度を更新
         boomAngle +=
             direction * angleSpeed * Time.deltaTime;
 
+        // 角度の最小値と最大値の範囲内に制限
         boomAngle = Mathf.Clamp(
             boomAngle,
             minimumAngle,
             maximumAngle
         );
 
+        // 位置を更新
         UpdateBoomPosition();
     }
 
+    // 振り子の根本を移動させる処理 //
     private void UpdateBoomPosition()
     {
         if (cranePivot == null ||
@@ -90,12 +103,15 @@ public class CraneBoomController : MonoBehaviour
             return;
         }
 
+        // 度からラジアンへ変換
         float angleRadians =
             boomAngle * Mathf.Deg2Rad;
 
+        // 回転中心の位置を取得
         Vector3 pivotPosition =
             cranePivot.position;
 
+        // PendulumRootの座標計算
         Vector3 rootPosition = new Vector3(
             pivotPosition.x -
                 Mathf.Sin(angleRadians) * boomRadius,
@@ -127,6 +143,7 @@ public class CraneBoomController : MonoBehaviour
         );
     }
 
+    // クレーンアームの見た目を更新する処理 //
     private void UpdateBoomVisual(
     Vector3 pivotPosition,
     Vector3 rootPosition)
@@ -136,9 +153,11 @@ public class CraneBoomController : MonoBehaviour
             return;
         }
 
+        // クレーンの根元から、振り子との接続位置へ向かうベクトル
         Vector3 difference =
             rootPosition - pivotPosition;
 
+        // アームの長さ
         float length = difference.magnitude;
 
         if (length < 0.001f)
@@ -173,26 +192,31 @@ public class CraneBoomController : MonoBehaviour
             );
     }
 
+    // 左へ動かす
     public void BeginMoveLeft()
     {
         moveLeft = true;
     }
 
+    // 左移動を終了
     public void EndMoveLeft()
     {
         moveLeft = false;
     }
 
+    // 右へ動かす
     public void BeginMoveRight()
     {
         moveRight = true;
     }
 
+    // 右移動を終了
     public void EndMoveRight()
     {
         moveRight = false;
     }
 
+    // STARTボタンを押したときの処理
     public void StopSetup()
     {
         setupMode = false;
@@ -200,6 +224,7 @@ public class CraneBoomController : MonoBehaviour
         moveRight = false;
     }
 
+    // STOPボタンを押したときの処理
     public void ResumeSetup()
     {
         setupMode = true;

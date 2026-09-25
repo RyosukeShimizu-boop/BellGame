@@ -1,4 +1,9 @@
 using UnityEngine;
+// ======================================= //
+// HitPointTypeChanger.cs
+// HitPointのハンマー表示切替処理
+// ======================================= //
+
 
 public class HitPointTypeChanger : MonoBehaviour
 {
@@ -8,6 +13,7 @@ public class HitPointTypeChanger : MonoBehaviour
     [SerializeField]
     private GameObject woodVisual;
 
+    // 鉄製ハンマー表示処理 //
     public void SetHammer()
     {
         if (hammerVisual != null)
@@ -21,6 +27,7 @@ public class HitPointTypeChanger : MonoBehaviour
         }
     }
 
+    // 木槌表示処理
     public void SetWood()
     {
         if (hammerVisual != null)

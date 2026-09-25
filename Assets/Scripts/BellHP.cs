@@ -1,6 +1,10 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+// ======================================= //
+// BellHP.cs
+// 鐘のHP(残煩悩)管理
+// ======================================= //
 
 public class BellHP : MonoBehaviour
 {
@@ -28,11 +32,13 @@ public class BellHP : MonoBehaviour
     public int CurrentHealth => currentHealth;
     public bool IsDestroyed => isDestroyed;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         ResetHealth();
     }
 
+    // ダメージを与える(煩悩を減らす)処理 //
     public void TakeDamage(int damage)
     {
         // HPが0になった後はBellHP側では処理しない
@@ -43,6 +49,7 @@ public class BellHP : MonoBehaviour
             return;
         }
 
+        // 万が一ダメージが-値だった場合0にする
         damage = Mathf.Max(damage, 0);
 
         if (damage <= 0)
@@ -50,18 +57,16 @@ public class BellHP : MonoBehaviour
             return;
         }
 
+        // 煩悩を減らす処理
         currentHealth = Mathf.Max(
             currentHealth - damage,
             0
         );
 
+        // ゲージ更新処理
         UpdateHealthUI();
 
-        Debug.Log(
-            $"Bell Damage: {damage}, " +
-            $"HP: {currentHealth} / {maximumHealth}"
-        );
-
+        // 煩悩が0になった時の処理
         if (currentHealth <= 0)
         {
             isDestroyed = true;
@@ -69,6 +74,7 @@ public class BellHP : MonoBehaviour
         }
     }
 
+    // HP(煩悩)を初期値に戻す
     public void ResetHealth()
     {
         currentHealth = maximumHealth;
@@ -87,14 +93,12 @@ public class BellHP : MonoBehaviour
         }
 
         UpdateHealthUI();
-
-        Debug.Log(
-            $"Bell HPをリセット: " +
-            $"{currentHealth} / {maximumHealth}"
-        );
     }
+
+    // HP(煩悩)ゲージ更新処理 //
     private void UpdateHealthUI()
     {
+        // slider更新
         if (healthBar != null)
         {
             healthBar.minValue = 0;
@@ -102,6 +106,7 @@ public class BellHP : MonoBehaviour
             healthBar.value = currentHealth;
         }
 
+        // Text更新
         if (healthText != null)
         {
             healthText.text =
@@ -109,13 +114,9 @@ public class BellHP : MonoBehaviour
         }
     }
 
+    // HP(煩悩)が0になった時の処理
     private void OnBellDestroyed()
     {
-        Debug.Log(
-            "Bell HPが0になりました。" +
-            "制限時間を追加して、ご利益タイムを開始します。"
-        );
-
         // HPゲージを非表示
         if (healthBar != null)
         {

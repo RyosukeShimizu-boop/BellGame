@@ -1,4 +1,9 @@
 using UnityEngine;
+// ======================================= //
+// PendulumEnergyAssist.cs
+// 振り子の勢い補助処理
+// ※現在は未使用
+// ======================================= //
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PendulumEnergyAssist : MonoBehaviour
@@ -15,6 +20,7 @@ public class PendulumEnergyAssist : MonoBehaviour
     // 開始時のエネルギー
     private float targetEnergy;
 
+    // ゲーム開始時処理 //
     private void Awake()
     {
         rigidBody2D = GetComponent<Rigidbody2D>();
@@ -23,11 +29,13 @@ public class PendulumEnergyAssist : MonoBehaviour
         rigidBody2D.angularDamping = 0.0f;
     }
 
+    // 開始時の総エネルギーを保存 //
     private void Start()
     {
         targetEnergy = CalculateEnergy();
     }
 
+    // 物理更新処理 //
     private void FixedUpdate()
     {
         float currentEnergy = CalculateEnergy();
@@ -54,6 +62,7 @@ public class PendulumEnergyAssist : MonoBehaviour
         );
     }
 
+    // エネルギー計算処理
     private float CalculateEnergy()
     {
         // 並進運動エネルギー
